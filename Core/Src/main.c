@@ -49,8 +49,7 @@
       (byte & 0x01 ? '1' : '0')
 
 #define KEYBOARD_NTA_FORMAT "1 %u %u\r\n%n"
-#define KEYBOARD_NTA_REDIRECT_MESSAGE "@NTAREDIR@\r\n"
-#define KEYBOARD_TOGGLE_NTA_REDIRECT() HAL_UART_Transmit(&huart2, KEYBOARD_NTA_REDIRECT_MESSAGE, sizeof(KEYBOARD_NTA_REDIRECT_MESSAGE), 100)
+#define KEYBOARD_NTA_REDIRECT_MESSAGE "@NTAREDIR@"
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -89,6 +88,15 @@ void print_adc();
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+void keyboard_set_nta_redirect(int toset)
+{
+  uint8_t MSG[32];
+  memset(MSG, 0, sizeof(MSG));
+  int msglen;
+  sprintf(MSG, "%s %d\r\n%n", KEYBOARD_NTA_REDIRECT_MESSAGE, toset, &msglen);
+  HAL_UART_Transmit(&huart2, MSG, msglen*sizeof(char), 100);
+}
 
 void delay_us(uint16_t us)
 {
@@ -129,7 +137,7 @@ void send_keys(int report)
 
 void print_adc()
 {
-  KEYBOARD_TOGGLE_NTA_REDIRECT();
+  keyboard_set_nta_redirect(1);
   uint8_t writer = 0b10010000;
   HAL_I2C_Mem_Write(&hi2c1, 75 << 1, 0x3, I2C_MEMADD_SIZE_8BIT, &writer, 1, 0xFFF);
   uint8_t MSG[128] = {"\e[3J\033c\e[1;34mADC READS:\e[0m\r\n\n\n\n\n"};
@@ -151,15 +159,15 @@ void print_adc()
     HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
     i++;
   }
-  HAL_Delay(1000);
-  KEYBOARD_TOGGLE_NTA_REDIRECT();
+  keyboard_set_nta_redirect(0);
 }
 
 // This function is to be used with the debugger connected to the STM, in order to, in real time, modify an I2c device's memory.
 void EDIT_I2C_MEMORY_DEBUG()
 {
-  KEYBOARD_TOGGLE_NTA_REDIRECT();
-  uint8_t MSG[128];
+  keyboard_set_nta_redirect(1);
+  uint8_t MSG[128] = {"\e[3J\033c\e[1;34mMemory Editing:\e[0m\r\n\n\n\n\n"};
+  HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
   HAL_Delay(150);
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 0);
@@ -177,7 +185,7 @@ void EDIT_I2C_MEMORY_DEBUG()
   HAL_I2C_Mem_Read(&hi2c1, 75 << 1, i, I2C_MEMADD_SIZE_8BIT, &reader, 1, 0xFFF);
   sprintf(MSG, "%u confirm: " BYTE_TO_BINARY_PATTERN "\r\n", i, BYTE_TO_BINARY(reader));
   HAL_UART_Transmit(&huart2, MSG, sizeof(MSG), 100);
-  KEYBOARD_TOGGLE_NTA_REDIRECT();
+  keyboard_set_nta_redirect(0);
 }
 /* USER CODE END 0 */
 
