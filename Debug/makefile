@@ -60,8 +60,8 @@ all: main-build
 main-build: tad-firmware.elf secondary-outputs
 
 # Tool invocations
-tad-firmware.elf tad-firmware.map: $(OBJS) $(USER_OBJS) /media/pepfof/228fad55-374a-465f-a4aa-5064f7d96cea/pepfof/STM32CubeIDE/workspace_1.8.0/tadbottom/STM32G030C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "tad-firmware.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"/media/pepfof/228fad55-374a-465f-a4aa-5064f7d96cea/pepfof/STM32CubeIDE/workspace_1.8.0/tadbottom/STM32G030C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="tad-firmware.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+tad-firmware.elf tad-firmware.map: $(OBJS) $(USER_OBJS) /home/pepfof/git/tad/tad-firmware/STM32G030C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "tad-firmware.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"/home/pepfof/git/tad/tad-firmware/STM32G030C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="tad-firmware.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
